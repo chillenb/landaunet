@@ -3,7 +3,7 @@
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
-#include "model.h"
+#include "solver.h"
 #include <stdint.h>
 
 
