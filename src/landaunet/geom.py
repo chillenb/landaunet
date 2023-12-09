@@ -30,13 +30,13 @@ def skewvecs(vecs, coef=1.0):
 
 def red_black_isotropic_step(P, Q, dt):
     skewPavg = skewvecs(neigh_avg(P), coef=dt/2)
-    Qnew = (np.eye(3)+skewPavg) @ Q
-    Qnew = np.linalg.solve(np.eye(3)-skewPavg, Qnew)
+    Q = Q + (skewPavg @ Q[...,None])[...,0]
+    Q = np.linalg.solve(np.eye(3)-skewPavg, Q)
     
-    skewQnewavg = skewvecs(neigh_avg(Qnew), coef=dt/2)
-    Pnew = (np.eye(3)+skewQnewavg) @ P
-    Pnew = np.linalg.solve(np.eye(3)-skewQnewavg, Pnew)
-    return Pnew, Qnew
+    skewQnewavg = skewvecs(neigh_avg(Q), coef=dt/2)
+    P = P + (skewQnewavg  @ P[...,None])[...,0]
+    P = np.linalg.solve(np.eye(3)-skewQnewavg, P)
+    return P, Q
 
 def red_black_isotropic_start(data, dt):
     ck = checkerboard(data.shape[:2])
@@ -46,9 +46,22 @@ def red_black_isotropic_start(data, dt):
     Q[ck==0] = 0
     skewPavg = skewvecs(neigh_avg(P), coef=dt/2)
     Qhalf = np.linalg.solve(np.eye(3)-skewPavg, Q)
-    Qhalf[ck==1] = 0
+    Qhalf[ck==0] = 0
     return P, Qhalf
-    
+
+def reassemble(P, Q):
+    ck = checkerboard(P.shape[:2])
+    data = np.zeros_like(P)
+    data[ck==0] = P[ck==0]
+    data[ck==1] = Q[ck==1]
+    return data
+
+def red_black_isotropic_end(P, Q, dt):
+    skewPavg = skewvecs(neigh_avg(P), coef=dt/2)
+    Qnext = ((np.eye(3)+skewPavg) @ Q[...,None])[...,0]
+    return reassemble(P, Qnext)
+
+
 
 class Periodic2D:
     """Periodic 2D domain."""
