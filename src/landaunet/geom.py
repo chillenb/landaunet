@@ -12,7 +12,7 @@ def copy_halo(data):
     data[:, 0] = data[:, -2]
     data[:, -1] = data[:, 1]
 
-def neigh_avg(data):
+def neigh_avg(data, dirichletbc=False):
     return (np.roll(data, 1, axis=0) + np.roll(data, -1, axis=0) + \
               np.roll(data, 1, axis=1) + np.roll(data, -1, axis=1)) * 0.25
 
@@ -63,12 +63,18 @@ def red_black_isotropic_end(P, Q, dt):
     return reassemble(P, Qnext)
 
 
-def halo_copy(data):
+def halo_copy(data, dirichletbc=False):
     """Copy halo of periodic domain."""
-    data[:, 0] = data[:, -2]
-    data[:, -1] = data[:, 1]
-    data[:, :, 0] = data[:, :, -2]
-    data[:, :, -1] = data[:, :, 1]
+    if dirichletbc is not None:
+        data[:, 0] = data[:, -2]
+        data[:, -1] = data[:, 1]
+        data[:, :, 0] = data[:, :, -2]
+        data[:, :, -1] = data[:, :, 1]
+    else:
+        data[:, 0, :] = dirichletbc[:, None]
+        data[:, -1, :] = dirichletbc[:, None]
+        data[:, :, 0] = dirichletbc[:, None]
+        data[:, :, -1] = dirichletbc[:, None]
 
 
 class Periodic2D:
@@ -90,7 +96,7 @@ class Periodic2D:
         self.data = np.zeros((3, nx + 2, ny + 2))
         if data is not None:
             self.data[:, 1:-1, 1:-1] = data
-            halo_copy(self.data)
+            halo_copy(self.data, dirichletbc=np.array([0.0,0.0,1.0]))
 
     def setup_data(self):
         P, Q = red_black_isotropic_start(np.moveaxis(self.data, 0, 2), self.dt)

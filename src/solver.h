@@ -76,22 +76,22 @@ void redblack_step_2d(py::array_t<double> data, double dt) {
     }
   }
 
-  // fill halo from opposite side; pbc
+  // fill halo for dirichlet BC
   for (py::ssize_t i = 1; i < nx - 1; i++) {
-    r(0, i, 0) = r(0, i, ny - 2);
-    r(1, i, 0) = r(1, i, ny - 2);
-    r(2, i, 0) = r(2, i, ny - 2);
-    r(0, i, ny - 1) = r(0, i, 1);
-    r(1, i, ny - 1) = r(1, i, 1);
-    r(2, i, ny - 1) = r(2, i, 1);
+    r(0, i, 0) = 0.0;
+    r(1, i, 0) = 0.0;
+    r(2, i, 0) = 1.0;
+    r(0, i, ny - 1) = 0.0;
+    r(1, i, ny - 1) = 0.0;
+    r(2, i, ny - 1) = 1.0;
   }
   for (py::ssize_t j = 1; j < ny - 1; j++) {
-    r(0, 0, j) = r(0, nx - 2, j);
-    r(1, 0, j) = r(1, nx - 2, j);
-    r(2, 0, j) = r(2, nx - 2, j);
-    r(0, nx - 1, j) = r(0, 1, j);
-    r(1, nx - 1, j) = r(1, 1, j);
-    r(2, nx - 1, j) = r(2, 1, j);
+    r(0, 0, j) = 0.0;
+    r(1, 0, j) = 0.0;
+    r(2, 0, j) = 1.0;
+    r(0, nx - 1, j) = 0.0;
+    r(1, nx - 1, j) = 0.0;
+    r(2, nx - 1, j) = 1.0;
   }
 
   // interior P update:
@@ -114,22 +114,22 @@ void redblack_step_2d(py::array_t<double> data, double dt) {
   }
 
   
-  // fill halo from opposite side; pbc
+  // fill halo for dirichlet BC
   for (py::ssize_t i = 1; i < nx - 1; i++) {
-    r(0, i, 0) = r(0, i, ny - 2);
-    r(1, i, 0) = r(1, i, ny - 2);
-    r(2, i, 0) = r(2, i, ny - 2);
-    r(0, i, ny - 1) = r(0, i, 1);
-    r(1, i, ny - 1) = r(1, i, 1);
-    r(2, i, ny - 1) = r(2, i, 1);
+    r(0, i, 0) = 0.0;
+    r(1, i, 0) = 0.0;
+    r(2, i, 0) = 1.0;
+    r(0, i, ny - 1) = 0.0;
+    r(1, i, ny - 1) = 0.0;
+    r(2, i, ny - 1) = 1.0;
   }
   for (py::ssize_t j = 1; j < ny - 1; j++) {
-    r(0, 0, j) = r(0, nx - 2, j);
-    r(1, 0, j) = r(1, nx - 2, j);
-    r(2, 0, j) = r(2, nx - 2, j);
-    r(0, nx - 1, j) = r(0, 1, j);
-    r(1, nx - 1, j) = r(1, 1, j);
-    r(2, nx - 1, j) = r(2, 1, j);
+    r(0, 0, j) = 0.0;
+    r(1, 0, j) = 0.0;
+    r(2, 0, j) = 1.0;
+    r(0, nx - 1, j) = 0.0;
+    r(1, nx - 1, j) = 0.0;
+    r(2, nx - 1, j) = 1.0;
   }
 
 }
