@@ -100,3 +100,36 @@ class Periodic2D:
     
     def step(self):
         _core.redblack_step_2d(self.data, self.dt)
+
+def normalizedata(data):
+    return data / np.linalg.norm(data, axis=0)[None, ...]
+
+class UnitNormVec3RF:
+    def __init__(self,  N=12, mostly_z = None):
+
+        self.N = N
+
+        self.freqs = 2*np.pi*np.arange(-N*1.0, N+1.0, 1.0)
+        self.fsize = 2*N+1
+        self.mostly_z = mostly_z
+
+    def random(self, size):
+        magnitudes = (np.random.randn(size, 3 * (self.fsize)**2) +
+                      1j*np.random.randn(size, 3 * (self.fsize)**2)) \
+                      * 1/(2*self.fsize)**2
+
+        return magnitudes
+
+    def eval_batch(self, features, xs):
+        x_tr = np.exp(1j*np.outer(xs[:,0], self.freqs))
+        y_tr = np.exp(1j*np.outer(xs[:,1], self.freqs))
+
+        f = np.reshape(features, (-1, self.freqs.size, self.freqs.size, 3))
+        prod = np.einsum('abcd, qb, qc -> aqd', f, x_tr, y_tr).real
+        prod = np.array(prod/np.linalg.norm(prod, axis=-1)[..., None])
+        if self.mostly_z is not None:
+            prod = prod * (1-self.mostly_z)
+            prod[:,:,-1] += 1
+            prod = np.array(prod/np.linalg.norm(prod, axis=-1)[..., None])
+
+        return prod
