@@ -12,23 +12,22 @@ using std::vector;
 
 PYBIND11_MODULE(_core, m) {
     m.doc() = R"pbdoc(
-        Ising model in C++
+        LL solver in C++
         -----------------------
 
-        .. currentmodule:: ising
+        .. currentmodule:: landaunet
 
         .. autosummary::
            :toctree: _generate
 
-           get_spins
-           random_mc_meanstd
-           energy
     )pbdoc";
-    py::class_<Model>(m, "Model")
-        .def(py::init<uint64_t, Real, Real, vector<int>>())
-        .def("get_spins", &Model::get_spins)
-        .def("random_mc_meanstd", &Model::random_mc_meanstd)
-        .def_readwrite("energy", &Model::energy);
+    m.def("bsolve", &bsolve, R"pbdoc(
+        red-black update core equation
+    )pbdoc");
+    m.def("redblack_step_2d", &redblack_step_2d, R"pbdoc(
+        Solve the LL equation for a single timestep
+    )pbdoc");
+
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

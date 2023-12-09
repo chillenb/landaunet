@@ -1,4 +1,5 @@
 import numpy as np
+from landaunet import _core
 
 def checkerboard(shape):
     return np.indices(shape).sum(axis=0) % 2
@@ -62,16 +63,23 @@ def red_black_isotropic_end(P, Q, dt):
     return reassemble(P, Qnext)
 
 
+def halo_copy(data):
+    """Copy halo of periodic domain."""
+    data[:, 0] = data[:, -2]
+    data[:, -1] = data[:, 1]
+    data[:, :, 0] = data[:, :, -2]
+    data[:, :, -1] = data[:, :, 1]
+
 
 class Periodic2D:
     """Periodic 2D domain."""
 
-    def __init__(self, nx, ny, h, D, data=None):
+    def __init__(self, nx, ny, dt, D, data=None):
         self.nx = nx
         self.ny = ny
         if nx % 2 != 0 or ny % 2 != 0:
             raise ValueError("nx and ny must be even.")
-        self.h = h
+        self.dt = dt
         self.D = D
 
         if np.asarray(D).size == 1:
@@ -79,8 +87,16 @@ class Periodic2D:
         else:
             self.anisotropic = True
 
-        if data is None:
-            self.data = np.zeros((nx, ny, 3))
-        else:
-            self.data= data
+        self.data = np.zeros((3, nx + 2, ny + 2))
+        if data is not None:
+            self.data[:, 1:-1, 1:-1] = data
+            halo_copy(self.data)
 
+    def setup_data(self):
+        P, Q = red_black_isotropic_start(np.moveaxis(self.data, 0, 2), self.dt)
+        self.data = reassemble(P, Q)
+        self.data = np.moveaxis(self.data, 2, 0).copy()
+        halo_copy(self.data)
+    
+    def step(self):
+        _core.redblack_step_2d(self.data, self.dt)
